@@ -18,10 +18,10 @@ public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
    configuration.setAllowedOrigins(
-        Arrays.asList(
-                "http://localhost:5173",
-                "https://YOUR-VERCEL-DOMAIN.vercel.app"
-        )
+    Arrays.asList(
+        "http://localhost:5173",
+        "https://stayfinder-frontend-eight.vercel.app"
+    )
 );
 
     configuration.setAllowedMethods(
