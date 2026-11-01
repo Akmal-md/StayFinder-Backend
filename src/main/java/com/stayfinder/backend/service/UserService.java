@@ -10,9 +10,9 @@ import com.stayfinder.backend.User;
 import com.stayfinder.backend.dto.LoginRequest;
 import com.stayfinder.backend.dto.LoginResponse;
 import com.stayfinder.backend.dto.RegisterRequest;
+import com.stayfinder.backend.dto.RegisterResponse;
 import com.stayfinder.backend.repository.UserRepository;
 import com.stayfinder.backend.security.JwtService;
-import com.stayfinder.backend.dto.RegisterResponse;
 
 @Service
 public class UserService {
@@ -29,23 +29,30 @@ public class UserService {
 
     public RegisterResponse registerUser(RegisterRequest request) {
 
-        User user = new User();
+    User user = new User();
 
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+    user.setName(request.getName());
+    user.setEmail(request.getEmail());
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        user.setRole("TENANT");
+    String role = request.getRole();
 
-        User savedUser = userRepository.save(user);
-
-        return new RegisterResponse(
-          savedUser.getId(),
-          savedUser.getName(),
-          savedUser.getEmail(),
-          savedUser.getRole()
-        );
+    if (role == null ||
+        (!role.equalsIgnoreCase("OWNER") && !role.equalsIgnoreCase("TENANT"))) {
+        throw new IllegalArgumentException("Invalid role. Choose OWNER or TENANT.");
     }
+
+    user.setRole(role.toUpperCase());
+
+    User savedUser = userRepository.save(user);
+
+    return new RegisterResponse(
+        savedUser.getId(),
+        savedUser.getName(),
+        savedUser.getEmail(),
+        savedUser.getRole()
+    );
+}
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
