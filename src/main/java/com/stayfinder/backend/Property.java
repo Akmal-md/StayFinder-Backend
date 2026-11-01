@@ -2,10 +2,9 @@ package com.stayfinder.backend;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -13,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Property {
@@ -29,13 +29,13 @@ public class Property {
     private String image;
     private Boolean available;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-@CollectionTable(
-    name = "property_amenities",
-    joinColumns = @JoinColumn(name = "property_id")
-)
-@Column(name = "amenity")
-private List<String> amenities;
+    @OneToMany(
+            mappedBy = "property",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
+    private List<PropertyAmenity> amenities = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
@@ -118,15 +118,22 @@ private List<String> amenities;
     }
 
     public List<String> getAmenities() {
-    return amenities;
-}
+        return amenities.stream()
+                .map(PropertyAmenity::getAmenity)
+                .collect(Collectors.toList());
+    }
 
-public void setAmenities(List<String> amenities) {
-    this.amenities = amenities;
-}
+    public void setAmenities(List<String> amenities) {
 
+        this.amenities.clear();
 
-
-
+        if (amenities != null) {
+            for (String amenity : amenities) {
+                this.amenities.add(
+                        new PropertyAmenity(amenity, this)
+                );
+            }
+        }
+    }
 
 }
